@@ -1,5 +1,5 @@
 import React from 'react';
-import {TextField, RaisedButton} from 'material-ui';
+import {TextField, RaisedButton, Snackbar} from 'material-ui';
 import FileList from '../containers/file_list';
 
 const styles = {
@@ -21,7 +21,6 @@ const styles = {
 class FilePage extends React.Component {
   constructor(props) {
     super(props);
-
     this.state = {filterText: ''};
   }
 
@@ -32,15 +31,31 @@ class FilePage extends React.Component {
   }
 
   upload(event){
-    console.log(event.target.files);
     _.map(event.target.files, (file) => {
-      this.props.upload(file);
+      var res = this.props.upload(file);
     });
   }
 
-  render() {
+  // message: {type: '', content: ''}
+  renderNotification(message){
     return (
-      <div>
+      <Snackbar
+        open={true}
+        message={message.content}
+        autoHideDuration={3000}
+      />
+    );
+  }
+
+  render() {
+    console.log(this.props, this.state)
+    const {message} = this.props
+
+    return (
+      <div className="file-page">
+
+        {message ? this.renderNotification(message) : null}
+
         <TextField
           id="search"
           value={this.state.value}
@@ -57,6 +72,11 @@ class FilePage extends React.Component {
         <FileList filterText={this.state.filterText} />
       </div>
     );
+  }
+
+  componentWillUnmount(){
+    console.log("unmount")
+    this.props.clearMessage();
   }
 }
 

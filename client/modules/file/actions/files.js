@@ -1,34 +1,35 @@
 import {Files} from '/lib/collections';
 
 export default {
-  upload({Meteor}, file) {
-    console.log(file);
-    if (file) {
-        var uploadInstance = Files.insert({
-          file: file,
-          streams: 'dynamic',
-          chunkSize: 'dynamic'
-        }, false);
+  upload({Meteor, LocalState}, file) {
 
-        uploadInstance.on('start', function() {
-          // template.currentFile.set(this);
-        });
+    var uploadInstance = Files.insert({
+        file: file,
+        streams: 'dynamic',
+        chunkSize: 'dynamic'
+      }, false);
 
-        uploadInstance.on('error', function(error) {
-          console.error(error);
-          // template.currentFile.set(false);
-        });
+      uploadInstance.on('start', function() {
+        // return LocalState.set('message', 'Start uploading ...')
+      });
 
-        uploadInstance.on('end', function(error, fileObj) {
-          if (error) {
-            alert('Error during upload: ' + error.reason);
-          } else {
-            alert('File "' + fileObj.name + '" successfully uploaded');
-          }
-          // template.currentFile.set(false);
-        });
+      uploadInstance.on('error', function(error) {
+        // return LocalState.set('error', error)
+      });
 
-        uploadInstance.start();
-      }
+      uploadInstance.on('end', function(error, fileObj) {
+        if (error) {
+          return LocalState.set('message', {type: 'error', content: error.message})
+        } else {
+          return LocalState.set('message', {type: 'success', content: 'Upload ' +
+           fileObj.name + ' finished.'})
+        }
+      });
+
+      uploadInstance.start();
   },
+
+  clearMessage({LocalState}) {
+    return LocalState.set('message', null);
+  }
 }
